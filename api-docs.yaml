@@ -1,0 +1,1283 @@
+openapi: 3.0.3
+info:
+  title: TTAN API Docs 
+  version: 1.0.0
+  description: API for managing users in the English Center Management System
+
+servers:
+  - url: https://api.example.com/api/v0/
+
+paths:
+  /users:
+    get:
+      summary: Get all users
+      description: Returns a list of all users (Admin, Teacher, Student, Guest)
+      tags:
+        - Users
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: role
+          in: query
+          schema:
+            type: string
+          required: false
+          description: Filter by user role
+        - name: page
+          in: query
+          schema:
+            type: integer
+          required: false
+          description: Page number
+        - name: limit
+          in: query
+          schema:
+            type: integer
+          required: false
+          description: Number of items per page
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/User'
+                  pagination:
+                    $ref: '#/components/schemas/Pagination'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+
+    post:
+      summary: Create a new user
+      description: Creates a new user. Only Admins can perform this action.
+      tags:
+        - Users
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UserCreate'
+      responses:
+        '201':
+          description: User created successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/User'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+
+  /users/{user_id}:
+    get:
+      summary: Get user by ID
+      tags:
+        - Users
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: user_id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: User details
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/User'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          $ref: '#/components/responses/NotFound'
+
+    put:
+      summary: Update user by ID
+      tags:
+        - Users
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: user_id
+          in: path
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UserUpdate'
+      responses:
+        '200':
+          description: User updated successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/User'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '404':
+          $ref: '#/components/responses/NotFound'
+
+    patch:
+      summary: Partially update user
+      tags:
+        - Users
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: user_id
+          in: path
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              additionalProperties: true
+      responses:
+        '200':
+          description: User partially updated
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/User'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '404':
+          $ref: '#/components/responses/NotFound'
+
+    delete:
+      summary: Delete user by ID
+      description: Can be soft-delete (set status = Inactive)
+      tags:
+        - Users
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: user_id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        '204':
+          description: User deleted successfully
+        '404':
+          $ref: '#/components/responses/NotFound'
+
+  /course-templates:
+    get:
+      summary: Get all course templates
+      tags: [CourseTemplate]
+      responses:
+        '200':
+          description: List of course templates
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/CourseTemplate'
+
+    post:
+      summary: Create a new course template
+      tags: [CourseTemplate]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CourseTemplateCreate'
+      responses:
+        '201':
+          description: Course template created
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CourseTemplate'
+
+  /course-templates/{template_id}:
+    get:
+      summary: Get a course template by ID
+      tags: [CourseTemplate]
+      parameters:
+        - name: template_id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: Course template details
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CourseTemplate'
+
+    put:
+      summary: Update a course template
+      tags: [CourseTemplate]
+      parameters:
+        - name: template_id
+          in: path
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CourseTemplateCreate'
+      responses:
+        '200':
+          description: Course template updated
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CourseTemplate'
+
+    delete:
+      summary: Delete a course template
+      tags: [CourseTemplate]
+      parameters:
+        - name: template_id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        '204':
+          description: Deleted successfully
+
+  /courses:
+    get:
+      summary: Get all courses
+      tags: [Course]
+      responses:
+        '200':
+          description: List of active courses
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Course'
+
+    post:
+      summary: Create a new course from a template
+      tags: [Course]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CourseCreate'
+      responses:
+        '201':
+          description: Course created
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Course'
+
+  /courses/{course_id}:
+    get:
+      summary: Get course by ID
+      tags: [Course]
+      parameters:
+        - name: course_id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: Course details
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Course'
+
+    put:
+      summary: Update course info
+      tags: [Course]
+      parameters:
+        - name: course_id
+          in: path
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CourseCreate'
+      responses:
+        '200':
+          description: Course updated
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Course'
+
+    delete:
+      summary: Delete a course (only if no students enrolled)
+      tags: [Course]
+      parameters:
+        - name: course_id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        '204':
+          description: Course deleted
+  /courses/{course_id}/teachers:
+    post:
+      summary: Assign teachers to course
+      tags: [TeacherAssignment]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: array
+              items:
+                type: object
+                properties:
+                  user_id:
+                    type: integer
+                  role:
+                    type: string
+                    enum: [Teacher, Assistant]
+      responses:
+        '200':
+          description: Teachers assigned
+
+    get:
+      summary: Get teachers in course
+      tags: [TeacherAssignment]
+      responses:
+        '200':
+          description: List of teachers with role
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  type: object
+                  properties:
+                    user_id:
+                      type: integer
+                    name:
+                      type: string
+                    email:
+                      type: string
+                    role:
+                      type: string
+
+  /courses/{course_id}/students:
+    post:
+      summary: Enroll students into course
+      tags: [StudentEnrollment]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                user_ids:
+                  type: array
+                  items:
+                    type: integer
+      responses:
+        '200':
+          description: Students enrolled
+
+    get:
+      summary: Get all students in course
+      tags: [StudentEnrollment]
+      responses:
+        '200':
+          description: List of enrolled students
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  type: object
+                  properties:
+                    user_id:
+                      type: integer
+                    name:
+                      type: string
+                    email:
+                      type: string
+
+  /courses/{course_id}/folders:
+    get:
+      summary: Get root folders in course
+      tags: [Folder]
+      responses:
+        '200':
+          description: List of root-level folders
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Folder'
+
+    post:
+      summary: Create a folder in course (root level or subfolder)
+      tags: [Folder]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/FolderCreate'
+      responses:
+        '201':
+          description: Folder created
+
+  /folders/{folder_id}/subfolders:
+    get:
+      summary: Get subfolders of a folder
+      tags: [Folder]
+      parameters:
+        - name: folder_id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: List of subfolders
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Folder'
+
+  /folders/{folder_id}/materials:
+    get:
+      summary: Get materials inside a folder
+      tags: [Material]
+      parameters:
+        - name: folder_id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: List of materials in folder
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Material'
+
+    post:
+      summary: Upload material to folder
+      tags: [Material]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/MaterialCreate'
+      responses:
+        '201':
+          description: Material uploaded
+  /conversations:
+    get:
+      summary: Get all conversations for the current user
+      tags: [Chat]
+      responses:
+        '200':
+          description: List of chat sessions
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/ChatSession'
+
+    post:
+      summary: Start a new chat session with admin
+      tags: [Chat]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                user_id:
+                  type: integer
+      responses:
+        '201':
+          description: New chat session started
+
+  /conversations/{conversation_id}/messages:
+    get:
+      summary: Get all messages in a conversation
+      tags: [Chat]
+      parameters:
+        - name: conversation_id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: List of messages
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Message'
+
+    post:
+      summary: Send a message in a conversation
+      tags: [Chat]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [sender_id, content]
+              properties:
+                sender_id:
+                  type: integer
+                content:
+                  type: string
+      responses:
+        '201':
+          description: Message sent
+
+  /courses/{course_id}/forum:
+    get:
+      summary: Get or create forum for course
+      tags: [Forum]
+      responses:
+        '200':
+          description: Forum info
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Forum'
+
+  /forum/{forum_id}/threads:
+    get:
+      summary: Get threads in a forum
+      tags: [Thread]
+      parameters:
+        - name: forum_id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: List of threads
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Thread'
+
+    post:
+      summary: Create a new discussion thread
+      tags: [Thread]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              required: [title, created_by]
+              properties:
+                title:
+                  type: string
+                created_by:
+                  type: integer
+      responses:
+        '201':
+          description: Thread created
+
+  /threads/{thread_id}/posts:
+    get:
+      summary: Get posts in a thread
+      tags: [Post]
+      responses:
+        '200':
+          description: List of posts
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Post'
+
+    post:
+      summary: Add post to thread
+      tags: [Post]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              required: [author_id, content]
+              properties:
+                author_id:
+                  type: integer
+                content:
+                  type: string
+      responses:
+        '201':
+          description: Post created
+
+  /courses/{course_id}/feedbacks:
+    get:
+      summary: Get feedbacks for course
+      tags: [Feedback]
+      responses:
+        '200':
+          description: List of feedbacks
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Feedback'
+
+    post:
+      summary: Submit feedback for a student
+      tags: [Feedback]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              required: [teacher_id, student_id, comment, score]
+              properties:
+                teacher_id:
+                  type: integer
+                student_id:
+                  type: integer
+                comment:
+                  type: string
+                score:
+                  type: number
+      responses:
+        '201':
+          description: Feedback submitted
+  /registrations:
+    post:
+      summary: Guest register for a course
+      tags: [Registration]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              required: [guest_id, course_id]
+              properties:
+                guest_id:
+                  type: integer
+                course_id:
+                  type: integer
+                status:
+                  type: string
+                  enum: [Pending, Test Scheduled, Completed]
+      responses:
+        '201':
+          description: Registration submitted
+
+    get:
+      summary: Admin fetch registration list
+      tags: [Registration]
+      parameters:
+        - name: status
+          in: query
+          schema:
+            type: string
+      responses:
+        '200':
+          description: List of registrations
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Registration'
+
+  /registrations/{registration_id}:
+    patch:
+      summary: Update registration status
+      tags: [Registration]
+      parameters:
+        - name: registration_id
+          in: path
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                status:
+                  type: string
+      responses:
+        '200':
+          description: Status updated
+
+  /payments:
+    post:
+      summary: Submit payment
+      tags: [Payment]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              required: [student_id, course_id, amount, method]
+              properties:
+                student_id:
+                  type: integer
+                course_id:
+                  type: integer
+                amount:
+                  type: number
+                method:
+                  type: string
+                  enum: [Momo, BankTransfer]
+                status:
+                  type: string
+                  enum: [Pending, Paid]
+      responses:
+        '201':
+          description: Payment recorded
+
+    get:
+      summary: Get payments
+      tags: [Payment]
+      parameters:
+        - name: student_id
+          in: query
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: Payment list
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Payment'
+
+  /blogs:
+    get:
+      summary: Get all blog posts
+      tags: [Blog]
+      responses:
+        '200':
+          description: Blog list
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Blog'
+
+    post:
+      summary: Admin create a blog post
+      tags: [Blog]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              required: [title, content, author_id]
+              properties:
+                title:
+                  type: string
+                content:
+                  type: string
+                author_id:
+                  type: integer
+                comments_enabled:
+                  type: boolean
+      responses:
+        '201':
+          description: Blog post created
+
+  /blogs/{blog_id}:
+    get:
+      summary: Get blog by ID
+      tags: [Blog]
+      parameters:
+        - name: blog_id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: Blog detail
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Blog'
+
+    put:
+      summary: Update blog post
+      tags: [Blog]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Blog'
+      responses:
+        '200':
+          description: Blog updated
+
+    delete:
+      summary: Delete blog post
+      tags: [Blog]
+      responses:
+        '204':
+          description: Blog deleted
+
+  /auth/login:
+    post:
+      summary: Login and get token
+      tags: [Auth]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              required: [email, password]
+              properties:
+                email:
+                  type: string
+                password:
+                  type: string
+      responses:
+        '200':
+          description: Access token returned
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  token:
+                    type: string
+
+  /auth/logout:
+    post:
+      summary: Logout current user
+      tags: [Auth]
+      responses:
+        '204':
+          description: Logged out
+
+  /auth/refresh:
+    post:
+      summary: Refresh access token
+      tags: [Auth]
+      responses:
+        '200':
+          description: New token returned
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  token:
+                    type: string
+components:
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+  
+  schemas:
+    User:
+      type: object
+      properties:
+        user_id:
+          type: integer
+        name:
+          type: string
+        email:
+          type: string
+        role:
+          type: string
+          enum: [Admin, Teacher, TA, Student, Guest]
+        phone:
+          type: string
+        status:
+          type: string
+          enum: [Active, Inactive]
+
+    UserCreate:
+      type: object
+      required: [name, email, password, role]
+      properties:
+        name:
+          type: string
+        email:
+          type: string
+        phone:
+          type: string
+        password:
+          type: string
+        role:
+          type: string
+          enum: [Admin, Teacher, Student, Guest]
+        status:
+          type: string
+          enum: [Active, Inactive]
+
+    UserUpdate:
+      allOf:
+        - $ref: '#/components/schemas/UserCreate'
+
+    CourseTemplate:
+      type: object
+      properties:
+        template_id:
+          type: integer
+        name:
+          type: string
+        description:
+          type: string
+        duration:
+          type: integer
+        created_by:
+          type: integer
+
+    CourseTemplateCreate:
+      type: object
+      required: [name, duration]
+      properties:
+        name:
+          type: string
+        description:
+          type: string
+        duration:
+          type: integer
+
+    Course:
+      type: object
+      properties:
+        course_id:
+          type: integer
+        template_id:
+          type: integer
+        teacher_id:
+          type: integer
+        start_date:
+          type: string
+          format: date
+        end_date:
+          type: string
+          format: date
+        status:
+          type: string
+          enum: [Scheduled, Ongoing, Completed]
+
+    CourseCreate:
+      type: object
+      required: [template_id, teacher_id, start_date, end_date]
+      properties:
+        template_id:
+          type: integer
+        teacher_id:
+          type: integer
+        start_date:
+          type: string
+          format: date
+        end_date:
+          type: string
+          format: date
+        status:
+          type: string
+          enum: [Scheduled, Ongoing, Completed]
+
+    Folder:
+      type: object
+      properties:
+        folder_id:
+          type: integer
+        course_id:
+          type: integer
+        parent_folder_id:
+          type: integer
+          nullable: true
+        folder_name:
+          type: string
+
+    FolderCreate:
+      type: object
+      required: [folder_name]
+      properties:
+        course_id:
+          type: integer
+        parent_folder_id:
+          type: integer
+          nullable: true
+        folder_name:
+          type: string
+
+    Material:
+      type: object
+      properties:
+        material_id:
+          type: integer
+        course_id:
+          type: integer
+        folder_id:
+          type: integer
+        teacher_id:
+          type: integer
+        name:
+          type: string
+        description:
+          type: string
+        file_url:
+          type: string
+        upload_date:
+          type: string
+          format: date-time
+        status:
+          type: string
+          enum: [Pending, Uploaded, Error]
+
+    MaterialCreate:
+      type: object
+      required: [name, file_url]
+      properties:
+        folder_id:
+          type: integer
+        teacher_id:
+          type: integer
+        name:
+          type: string
+        description:
+          type: string
+        file_url:
+          type: string
+        status:
+          type: string
+
+    ChatSession:
+      type: object
+      properties:
+        session_id:
+          type: integer
+        user_id:
+          type: integer
+        admin_id:
+          type: integer
+        created_at:
+          type: string
+          format: date-time
+
+    Message:
+      type: object
+      properties:
+        message_id:
+          type: integer
+        session_id:
+          type: integer
+        sender_id:
+          type: integer
+        content:
+          type: string
+        timestamp:
+          type: string
+          format: date-time
+
+    Forum:
+      type: object
+      properties:
+        forum_id:
+          type: integer
+        course_id:
+          type: integer
+
+    Thread:
+      type: object
+      properties:
+        thread_id:
+          type: integer
+        forum_id:
+          type: integer
+        title:
+          type: string
+        created_by:
+          type: integer
+        created_at:
+          type: string
+          format: date-time
+
+    Post:
+      type: object
+      properties:
+        post_id:
+          type: integer
+        thread_id:
+          type: integer
+        author_id:
+          type: integer
+        content:
+          type: string
+        timestamp:
+          type: string
+          format: date-time
+
+    Feedback:
+      type: object
+      properties:
+        feedback_id:
+          type: integer
+        teacher_id:
+          type: integer
+        student_id:
+          type: integer
+        course_id:
+          type: integer
+        comment:
+          type: string
+        score:
+          type: number
+        created_at:
+          type: string
+          format: date-time
+    Registration:
+      type: object
+      properties:
+        registration_id:
+          type: integer
+        guest_id:
+          type: integer
+        course_id:
+          type: integer
+        status:
+          type: string
+
+    Payment:
+      type: object
+      properties:
+        payment_id:
+          type: integer
+        student_id:
+          type: integer
+        course_id:
+          type: integer
+        amount:
+          type: number
+        method:
+          type: string
+        status:
+          type: string
+        paid_at:
+          type: string
+          format: date-time
+
+    Blog:
+      type: object
+      properties:
+        blog_id:
+          type: integer
+        title:
+          type: string
+        content:
+          type: string
+        author_id:
+          type: integer
+        comments_enabled:
+          type: boolean
+        created_at:
+          type: string
+          format: date-time
+    Pagination:
+      type: object
+      properties:
+        page:
+          type: integer
+        limit:
+          type: integer
+        total:
+          type: integer
+
+  responses:
+    Unauthorized:
+      description: Unauthorized
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              error:
+                type: string
+                example: Unauthorized
+    BadRequest:
+      description: Invalid input
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              error:
+                type: string
+              fields:
+                type: object
+    NotFound:
+      description: Resource not found
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              error:
+                type: string
+                example: Not Found
+              message:
+                type: string
