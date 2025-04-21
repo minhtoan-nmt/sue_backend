@@ -20,5 +20,5 @@ func NewRouter(cfg *config.Config) *gin.Engine {
 			"status": "ok",
 		})
 	})
-	// return router
+	return router
 }
