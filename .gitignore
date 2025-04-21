@@ -1,33 +1,62 @@
-HELP.md
-target/
-!.mvn/wrapper/maven-wrapper.jar
-!**/src/main/**/target/
-!**/src/test/**/target/
+# Binaries
+*.exe
+*.exe~
+*.dll
+*.so
+*.dylib
+*.test
+*.out
 
-### STS ###
-.apt_generated
-.classpath
-.factorypath
-.project
-.settings
-.springBeans
-.sts4-cache
+# Output of `go build`
+/bin/
+/build/
+/dist/
+main
 
-### IntelliJ IDEA ###
-.idea
-*.iws
+# Go workspace stuff
+go.work
+go.work.sum
+
+# Vendor directory (unless you commit vendor on purpose)
+/vendor/
+vendor/github.com/*
+# Dependency directories
+/pkg/mod/
+/.gopath/
+
+# IDE/editor stuff
+.vscode/
+.idea/
+*.swp
+
+# Logs & debug
+*.log
+*.trace
+*.prof
+*.tmp
+.DS_Store
+
+# Env & secrets
+.env
+.env.*
+*.key
+*.pem
+
+# Coverage & test
+coverage.*
+*.coverprofile
+*.cov
+*.testresult
+
+# Go tools
+/go.sum
+/go.mod
+
+# GitHub Codespaces, JetBrains, etc.
+*.code-workspace
 *.iml
 *.ipr
+*.iws
 
-### NetBeans ###
-/nbproject/private/
-/nbbuild/
-/dist/
-/nbdist/
-/.nb-gradle/
-build/
-!**/src/main/**/build/
-!**/src/test/**/build/
-
-### VS Code ###
-.vscode/
+# Local-only data
+.local/
