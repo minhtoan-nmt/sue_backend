@@ -15,6 +15,7 @@ type Config struct {
 	DB    DBConfig
 	Redis RedisConfig
 	Log   LogConfig
+	Auth  AuthConfig
 }
 
 func LoadAllConfigs(dir string) (*Config, error) {
@@ -30,6 +31,7 @@ func LoadAllConfigs(dir string) (*Config, error) {
 		{"database", &cfg.DB, func(v *viper.Viper) { overrideEnv(v, "database") }},
 		{"redis", &cfg.Redis, func(v *viper.Viper) { overrideEnv(v, "redis") }},
 		{"log", &cfg.Log, func(v *viper.Viper) { overrideEnv(v, "log") }},
+		{"auth", &cfg.Auth, func(v *viper.Viper) { overrideEnv(v, "auth") }},
 	}
 	log.Print(load)
 	for _, item := range load {
@@ -46,7 +48,7 @@ func LoadAllConfigs(dir string) (*Config, error) {
 		}
 		if item.EnvFn != nil {
 			item.EnvFn(v)
-			fmt.Printf("💡 Final %s config:\n%+v\n", item.Name, item.Target)
+			fmt.Printf("Final %s config:\n%+v\n", item.Name, item.Target)
 		}
 		if err := v.Unmarshal(item.Target); err != nil {
 			return nil, fmt.Errorf("error decoding %s config: %w", item.Name, err)

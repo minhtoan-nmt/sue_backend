@@ -11,7 +11,7 @@ const (
 )
 
 type User struct {
-	ID              int64
+	ID              int
 	First_name      *string   `json:"first_name" validate:"required,min=3,max=50"`
 	Last_name       *string   `json:"last_name" validate:"required,min=3,max=50"`
 	Email           *string   `json:"email" validate:"required,email"`
@@ -24,4 +24,5 @@ type User struct {
 	Status          string    `json:"status" validate:"required,oneof=active inactive deleted"`
 	CreatedAt       time.Time `json:"created_at"`
 	UpdatedAt       time.Time `json:"updated_at"`
+	Salt            *string   `json:"salt"`
 }

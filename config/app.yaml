@@ -1,4 +1,4 @@
 name: LMS
 env: development
-hostport: 127.0.0.1:7777
+hostport: 0.0.0.0:7777
 debug: true

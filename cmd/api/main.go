@@ -2,46 +2,72 @@ package main
 
 import (
 	"context"
-	"fmt"
 	"log"
+	"time"
+
+	"github.com/gin-gonic/gin"
+
 	"sue_backend/config"
+	"sue_backend/internal/common/middleware"
+	"sue_backend/internal/domain/repository"
+	"sue_backend/internal/domain/service"
+	"sue_backend/internal/infra/auth"
+	"sue_backend/internal/infra/cache"
 	"sue_backend/internal/infra/db"
-	"sue_backend/internal/transport/http"
+	"sue_backend/internal/transport/http/route"
 	"sue_backend/pkg/logger"
 )
 
 func main() {
-
 	ctx := context.Background()
 	log.SetFlags(log.LstdFlags | log.Lshortfile)
-	cfg, err := config.LoadAllConfigs("config")
-	log := logger.New(cfg.Log)    // zap/sl
-	router := http.NewRouter(cfg) // wires handlers + middleware
 
+	cfg, err := config.LoadAllConfigs("config")
 	if err != nil {
 		log.Fatalf("failed to load config: %v", err)
 	}
 
-	postgresDB, err := db.InitDB(ctx, cfg.DB)
+	logger := logger.New(cfg.Log)
+	logger.Info("⇢ initializing backend...")
+
+	dbConn, err := db.InitDB(ctx, cfg.DB)
 	if err != nil {
-		log.Fatalf("failed to connect to Postgres: %v", err)
+		logger.Fatalf("failed to connect to Postgres: %v", err)
 	}
-	defer postgresDB.Close()
+	defer dbConn.Close()
+	pgStore := db.NewPostgresStore(dbConn)
 
-	PGStore := db.NewPostgresStore(postgresDB)
-
-	rows, err := PGStore.ExecQuery(ctx, "SELECT * FROM student LIMIT 5")
+	redisClient, err := cache.InitRedis(cfg.Redis)
 	if err != nil {
-		log.Fatal("Query failed:", err)
+		logger.Fatalf("failed to connect to Redis: %v", err)
 	}
+	defer redisClient.Close()
+	redisStore := cache.NewRedisStore(redisClient)
 
-	for _, row := range rows {
-		fmt.Println(row)
+	// Init Repositories & Services
+	userRepo := repository.NewUserRepository(pgStore, redisStore)
+	jwtManager := auth.NewJWTManager(cfg.Auth.JWTSecret, time.Duration(cfg.Auth.JWTExpire))
+	authService := service.NewAuthService(userRepo, jwtManager)
+
+	// Init Gin engine & middleware
+	r := gin.New()
+	r.Use(gin.Logger(), gin.Recovery())
+	r.Use(middleware.CORS(), middleware.RequestID())
+
+	api := r.Group("/api/v0")
+
+	// public
+	rPublic := api.Group("")
+	route.RegisterAuthRoutes(rPublic, authService)
+
+	// protected
+	rProtected := api.Group("")
+	rProtected.Use(middleware.JWTAuth(cfg.Auth.JWTSecret))
+	// route.RegisterUserRoutes(rProtected)
+
+	// Start server
+	logger.Infof("⇢ starting HTTP server on %s", cfg.App.HostPort)
+	if err := r.Run(cfg.App.HostPort); err != nil {
+		logger.Fatalf("server error: %v", err)
 	}
-
-	log.Infof("⇢ starting HTTP server on %s", cfg.App.HostPort)
-	if err := router.Run(cfg.App.HostPort); err != nil {
-		log.Fatalf("server error: %v", err)
-	}
-
 }
