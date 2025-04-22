@@ -40,7 +40,7 @@ func (a *AuthService) RegisterUser(user *model.User) (string, error) {
 		return "", err
 	}
 
-	token, err := a.jwtManager.Generate(user.ID)
+	token, err := a.jwtManager.Generate(user.ID, string(user.Role))
 	if err != nil {
 		return "", err
 	}
@@ -56,7 +56,7 @@ func (a *AuthService) Login(email, password string) (string, error) {
 	if utils.HashPassword(password, *user.Salt) != *user.Password {
 		return "", errors.New("invalid email or password")
 	}
-	token, err := a.jwtManager.Generate(user.ID)
+	token, err := a.jwtManager.Generate(user.ID, string(user.Role))
 	if err != nil {
 		return "", err
 	}

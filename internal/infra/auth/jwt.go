@@ -17,9 +17,10 @@ func NewJWTManager(secretKey string, tokenTTL time.Duration) *JWTManager {
 		tokenTTL:  tokenTTL,
 	}
 }
-func (j *JWTManager) Generate(userID int) (string, error) {
+func (j *JWTManager) Generate(userID int64, role string) (string, error) {
 	claims := jwt.MapClaims{
 		"user_id": userID,
+		"role":    role,
 		"exp":     time.Now().Add(j.tokenTTL).Unix(),
 	}
 

@@ -11,7 +11,7 @@ const (
 )
 
 type User struct {
-	ID              int
+	ID              int64     `json:"id"`
 	First_name      *string   `json:"first_name" validate:"required,min=3,max=50"`
 	Last_name       *string   `json:"last_name" validate:"required,min=3,max=50"`
 	Email           *string   `json:"email" validate:"required,email"`

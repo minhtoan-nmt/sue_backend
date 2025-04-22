@@ -1,2 +1,2 @@
 JWT_SECRET: "your_jwt_secret"
-JWT_EXPIRATION: 72000
+JWT_EXPIRE: 24h

@@ -1,6 +1,7 @@
 package middleware
 
 import (
+	"log"
 	"net/http"
 	"strings"
 	"sue_backend/internal/common/response"
@@ -33,15 +34,19 @@ func JWTAuth(secret string) gin.HandlerFunc {
 		}
 
 		claims, ok := token.Claims.(jwt.MapClaims)
+		userIDFloat, ok := claims["user_id"].(float64)
 		if !ok {
 			response.WrapError(c, http.StatusUnauthorized, "Invalid token claims", nil)
 			c.Abort()
 			return
 		}
-
+		userID := int64(userIDFloat)
+		log.Printf("Role from token: %v", claims["role"])
+		roleStr, _ := claims["role"].(string)
+		log.Printf("Parsed role: %s", roleStr)
 		// inject user_id, role into context if needed
-		c.Set("user_id", claims["user_id"])
-		c.Set("role", claims["role"])
+		c.Set("user_id", userID)
+		c.Set("role", roleStr)
 		c.Next()
 	}
 }

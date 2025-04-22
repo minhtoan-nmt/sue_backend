@@ -46,6 +46,8 @@ func main() {
 
 	// Init Repositories & Services
 	userRepo := repository.NewUserRepository(pgStore, redisStore)
+	// print cfg.Auth.JWTSecret
+	logger.Infof("⇢ JWT Secret: %s", cfg.Auth.JWTSecret, cfg.Auth.JWTExpire)
 	jwtManager := auth.NewJWTManager(cfg.Auth.JWTSecret, time.Duration(cfg.Auth.JWTExpire))
 	authService := service.NewAuthService(userRepo, jwtManager)
 
@@ -61,9 +63,11 @@ func main() {
 	route.RegisterAuthRoutes(rPublic, authService)
 
 	// protected
-	rProtected := api.Group("")
-	rProtected.Use(middleware.JWTAuth(cfg.Auth.JWTSecret))
-	// route.RegisterUserRoutes(rProtected)
+	authGroup := api.Group("")
+	authGroup.Use(middleware.JWTAuth(cfg.Auth.JWTSecret))
+
+	userService := service.NewUserService(userRepo)
+	route.RegisterUserRoutes(authGroup, userService)
 
 	// Start server
 	logger.Infof("⇢ starting HTTP server on %s", cfg.App.HostPort)
