@@ -12,4 +12,6 @@ type Course struct {
 	EndDate    *time.Time
 	CreatedAt  time.Time
 	UpdatedAt  time.Time
+
+	TeacherAssignments []*TeacherAssignment `json:"teacher_assignments"`
 }

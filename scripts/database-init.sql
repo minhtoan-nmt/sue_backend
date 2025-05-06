@@ -49,12 +49,17 @@ CREATE TABLE IF NOT EXISTS courses (
     updated_at TIMESTAMP DEFAULT NOW()
 );
 
+DROP TABLE IF EXISTS teacher_assignments CASCADE;
 CREATE TABLE IF NOT EXISTS teacher_assignments (
     id BIGSERIAL PRIMARY KEY,
-    id BIGINT,
     teacher_id BIGINT,
     course_id BIGINT,
-    role VARCHAR(20) CHECK (role IN ('Teacher', 'Assistant')) NOT NULL
+    role VARCHAR(20) CHECK (role IN ('Teacher', 'Assistant')) NOT NULL,
+    status VARCHAR(20) CHECK (status IN ('active', 'inactive', 'deleted')) DEFAULT 'active',
+    start_date TIMESTAMP,
+    end_date TIMESTAMP,
+    created_at TIMESTAMP DEFAULT NOW(),
+    updated_at TIMESTAMP DEFAULT NOW()
 );
 
 CREATE TABLE IF NOT EXISTS student_enrollments (
