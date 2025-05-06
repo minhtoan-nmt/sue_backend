@@ -22,7 +22,6 @@ CREATE TABLE IF NOT EXISTS users (
 CREATE TABLE IF NOT EXISTS templates (
     id BIGSERIAL PRIMARY KEY,
     name VARCHAR(100) NOT NULL,
-    level VARCHAR(50),
     status VARCHAR(20) CHECK (status IN ('active', 'inactive', 'deleted')) DEFAULT 'active',
     created_by BIGINT,
     type VARCHAR(20) CHECK (type IN ('online', 'offline')) DEFAULT 'online',
@@ -75,7 +74,7 @@ CREATE TABLE IF NOT EXISTS folders (
     parent_id BIGINT,
     name VARCHAR(100) NOT NULL,
     description TEXT,
-    order INT DEFAULT 0,
+    "order" INT DEFAULT 0,
     status VARCHAR(20) CHECK (status IN ('active', 'inactive', 'deleted')) DEFAULT 'active',
     created_at TIMESTAMP DEFAULT NOW()
 );
@@ -92,9 +91,16 @@ CREATE TABLE IF NOT EXISTS materials (
     upload_date TIMESTAMP DEFAULT NOW()
 );
 
+DROP TABLE IF EXISTS forums CASCADE;
 CREATE TABLE IF NOT EXISTS forums (
     id BIGSERIAL PRIMARY KEY,
-    id BIGINT
+    course_id BIGINT,
+    title VARCHAR(255),
+    description TEXT,
+    status VARCHAR(20) CHECK (status IN ('open', 'closed')) DEFAULT 'open',
+    created_by BIGINT,
+    created_at TIMESTAMP DEFAULT NOW(),
+    updated_at TIMESTAMP DEFAULT NOW()
 );
 
 CREATE TABLE IF NOT EXISTS threads (

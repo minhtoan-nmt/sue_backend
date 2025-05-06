@@ -69,6 +69,13 @@ func main() {
 	userService := service.NewUserService(userRepo)
 	route.RegisterUserRoutes(authGroup, userService)
 
+	courseRepo := repository.NewCourseRepository(pgStore, redisStore)
+	courseService := service.NewCourseService(courseRepo)
+	route.RegisterCourseRoutes(authGroup, courseService)
+
+	courseTemplateRepo := repository.NewCourseTemplateRepository(pgStore, redisStore)
+	courseTemplateService := service.NewCourseTemplateService(courseTemplateRepo)
+	route.RegisterCourseTemplateRoutes(authGroup, courseTemplateService)
 	// Start server
 	logger.Infof("⇢ starting HTTP server on %s", cfg.App.HostPort)
 	if err := r.Run(cfg.App.HostPort); err != nil {
